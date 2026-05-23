@@ -8,8 +8,6 @@
 
 The AI Toolchain Decision Engine guides users through an interactive decision process to compose the optimal combination of AI tools for every stage of a development lifecycle: from initial idea and specification, through orchestration and multi-agent execution, to deployment, observability, and governance.
 
-The engine is built to be used **first by the author, then released as a free public service**, with a path toward monetization as the product matures.
-
 ---
 
 ## Core Principles
