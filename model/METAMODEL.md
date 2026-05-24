@@ -5,7 +5,7 @@
 > Date: 2026-05-24  
 > xleo task ref: T-001 / STO-31
 
-This document defines the abstract metamodel of the ATDE decision engine. It is the foundational schema — all other model artifacts (nodes, criteria, quiz flows, decision trees) are instances or extensions of this metamodel.
+This document defines the abstract metamodel of the ATDE decision engine. It is the foundational schema — all other model artifacts (nodes, criteria, assessment flows, decision trees) are instances or extensions of this metamodel.
 
 ---
 
@@ -58,8 +58,8 @@ ContextProfile:
 ```
 
 **Rules:**
-- `type` determines the quiz entry point (see STATUS_TRANSITIONS).
-- `dimensions` are populated progressively through the quiz.
+- `type` determines the assessment entry point (see STATUS_TRANSITIONS).
+- `dimensions` are populated progressively through the assessment flow.
 - At least `use_case` or `maturity + scale` must be present to enter the decision path.
 
 ---
@@ -152,7 +152,7 @@ DecisionPath:
   steps:                          # ordered list of decision steps
     - step: integer
       node_id: string
-      question: string            # quiz question for this node
+      question: string            # assessment question for this node
       answer: string              # user's answer
       candidates: [impl_id]       # implementations considered
       filtered_out: [impl_id]     # implementations excluded and why
@@ -257,9 +257,9 @@ All entity properties follow these base types:
 
 ---
 
-## Open questions (to resolve in T-002)
+## Open questions
 
-- [ ] Should `DecisionPath` steps map 1:1 to quiz questions, or can one step span multiple questions?
+- [ ] Should `DecisionPath` steps map 1:1 to assessment questions, or can one step span multiple questions?
 - [ ] Should `Recommendation.output_type` be set by the engine or by the user's preference?
 - [ ] How are conflicting `overrides` in EvaluationFrame resolved — first match, priority order, or union?
-- [ ] Should a ContextProfile be mutable during the quiz, or locked after the first step?
+- [ ] Should a ContextProfile be mutable during the assessment flow, or locked after the first step?
