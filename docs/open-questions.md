@@ -6,21 +6,22 @@
 
 ## 🟡 Model Architecture
 
-- [ ] **Meta-model schema**: What are the canonical abstract node types? What properties does each node have? What are the valid relationship types between nodes?
-- [ ] **Use case taxonomy**: How do we define and classify use cases in a way that is abstract, complete and stable over time?
-- [ ] **Criteria schema**: How do we formalize evaluation criteria so they can be weighted, combined and extended?
+- [ ] **Criteria schema — additional criteria**: `vendor-lock-in`, `self-hosting`, `api-access`, `model-agnostic`, `community-support`, `enterprise-sla`, `data-privacy` are listed but not yet fully defined with weights and applicable stages.
 - [ ] **Tool registry structure**: How do tools get registered? What fields are required (name, role, pricing, limits, integrations, compliance, geography, API access)?
 - [ ] **Scoring / ranking logic**: How does the engine turn answers into a scored recommendation? Rule-based, weighted matrix, AI-assisted or hybrid?
-- [ ] **Versioning**: How do we version the model itself when tools or criteria change?
+- [ ] **DecisionPath steps**: Should steps map 1:1 to assessment questions, or can one step span multiple questions?
+- [ ] **Recommendation output type**: Should `Recommendation.output_type` be set by the engine or by the user's preference?
+- [ ] **EvaluationFrame conflict resolution**: How are conflicting `overrides` resolved — first match, priority order, or union?
+- [ ] **ContextProfile mutability**: Should a ContextProfile be mutable during the assessment flow, or locked after the first step?
 
 ---
 
 ## 🟢 Use Cases
 
-- [ ] Finalize the top-level use case taxonomy (abstract, extensible)
 - [ ] Define sub-categories for each major use case type
+- [ ] Fill `lifecycle_emphasis` and `example_patterns` per use case in the taxonomy schema
 - [ ] Map typical toolchain patterns per use case type
-- [ ] Identify edge cases and hybrid scenarios (e.g. "internal tool that becomes a SaaS")
+- [ ] Identify edge cases and hybrid scenarios (e.g. “internal tool that becomes a SaaS”)
 
 ---
 
@@ -29,16 +30,18 @@
 - [ ] **Question flow design**: What is the exact sequence of questions in wizard mode? How does branching work?
 - [ ] **Advanced mode**: What additional controls, filters and views does it expose?
 - [ ] **Output format**: What does a recommendation look like? Card? Table? Diagram? Exportable doc?
-- [ ] **Entry point logic**: Exactly how does the solo vs organization split work in the UI?
+- [ ] **Assessment entry point — boundary**: Q0 answer B (department) vs C (enterprise) — headcount, budget authority, or governance model?
+- [ ] **Multi-select**: Should use case selection in Layer 1A allow multi-select, or single primary use case only?
 - [ ] **Saving / sharing configurations**: Do users need accounts? Anonymous sessions? Shareable links?
 - [ ] **Progressive disclosure**: How do we reveal complexity without overwhelming novice users?
+- [ ] **Max steps per layer**: How many questions maximum before user abandonment risk? Hypothesis: max 5.
 
 ---
 
 ## 🟣 Toolchain Research
 
 - [ ] **Chat / Spec layer**: Full comparison of Perplexity, Claude, ChatGPT, Gemini, Mistral and others for initial spec writing
-- [ ] **Orchestration layer**: n8n, Zapier, Make, LangGraph, CrewAI, AutoGen, Comet, and others — pricing, capabilities, lock-in
+- [ ] **Orchestration layer**: n8n, Zapier, Make, LangGraph, CrewAI, AutoGen and others — pricing, capabilities, lock-in
 - [ ] **Coding agents**: Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, Devin — strengths, limits, pricing, workflow integration
 - [ ] **Artifact / knowledge store**: Git, Notion, Confluence, SharePoint, Obsidian — role in the chain
 - [ ] **Multi-agent roles**: How to model Architect, Developer, QA, Security, Legal and other agent roles
@@ -65,6 +68,7 @@
 - [ ] **AI-assistance inside the engine**: Does the engine itself use AI to generate explanations and recommendations, or is it purely rule-based?
 - [ ] **API design**: What endpoints does the engine expose for external integrations?
 - [ ] **Deployment / hosting of the engine itself**: Who hosts it and how?
+- [ ] **Layer 1C governance filter**: Should `governance: centralized` immediately filter out tools not on the approved vendor list, or just reweight?
 
 ---
 
@@ -79,3 +83,9 @@
 | Entry point logic | Solo: use case first; Organization: org context first | 2026-05-23 |
 | Primary focus | Enterprise-grade production-ready app as north star | 2026-05-23 |
 | Distribution | Free public online service, open-source, future monetization | 2026-05-23 |
+| Meta-model schema | Defined in model/METAMODEL.md v0.1 — 5 core entities, connection types, properties taxonomy | 2026-05-24 |
+| Versioning strategy | Semantic versioning rules defined in METAMODEL.md | 2026-05-24 |
+| Use case taxonomy — top level | 10 top-level use case IDs defined in model/use-cases.md | 2026-05-24 |
+| Decision tree — first layer | Layer 0 and Layer 1 (solo, department, enterprise) defined in model/DECISION_TREE.md | 2026-05-24 |
+| Assessment flows | Solo and org entry point flows defined in assessment/ASSESSMENT_SOLO.md and assessment/ASSESSMENT_ORG.md | 2026-05-24 |
+| Assessment terminology | Renamed quiz → assessment across all model and assessment files | 2026-05-24 |
