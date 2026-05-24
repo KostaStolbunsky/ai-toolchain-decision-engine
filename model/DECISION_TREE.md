@@ -17,7 +17,7 @@ The decision tree operates in layers:
 ```
 Layer 0: Entry gate         ← this document covers Layer 0 and Layer 1
 Layer 1: Profile routing
-Layer 2: Use case / org context (see T-003, T-004)
+Layer 2: Use case / org context (see assessment/ASSESSMENT_SOLO.md, assessment/ASSESSMENT_ORG.md)
 Layer 3: Constraints & criteria weighting
 Layer 4: Node traversal
 Layer 5: Scoring & recommendation output
@@ -68,7 +68,7 @@ Q1A: What are you primarily trying to build or automate?
 ├── E) A data or analytics product                      → uc-data-product
 ├── F) An AI feature inside an existing product         → uc-embedded-ai
 ├── G) A knowledge base or documentation system         → uc-knowledge-system
-└── H) Something else / I’m not sure                   → clarification branch
+└── H) Something else / I'm not sure                   → clarification branch
 ```
 
 **Output:** Sets `ContextProfile.dimensions.use_case`.
@@ -201,7 +201,7 @@ Q0
 
 ---
 
-## Open questions (to resolve in T-003 / T-004)
+## Open questions
 
 - [ ] Q0 answer B (department) vs C (enterprise): where exactly is the boundary? Is it headcount, budget authority, or governance model?
 - [ ] Should Q1A use case options include multi-select, or is single primary use case sufficient for Layer 1?
