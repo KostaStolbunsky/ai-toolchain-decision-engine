@@ -1,12 +1,12 @@
 # Decision Tree — First Layer
 
-> Version: 0.1  
+> Version: 0.2  
 > Status: Draft  
 > Date: 2026-05-24  
 > xleo task ref: T-002 / STO-32  
 > Depends on: METAMODEL.md
 
-This document defines the first layer of the ATDE decision tree. The first layer determines the `ContextProfile` type and entry point, then routes the user into the appropriate quiz flow.
+This document defines the first layer of the ATDE decision tree. The first layer determines the `ContextProfile` type and entry point, then routes the user into the appropriate assessment flow.
 
 ---
 
@@ -206,4 +206,4 @@ Q0
 - [ ] Q0 answer B (department) vs C (enterprise): where exactly is the boundary? Is it headcount, budget authority, or governance model?
 - [ ] Should Q1A use case options include multi-select, or is single primary use case sufficient for Layer 1?
 - [ ] For Layer 1C, should `governance: centralized` immediately filter out tools not on the approved vendor list, or just reweight?
-- [ ] How many questions maximum per layer before user abandonment risk becomes significant? Hypothesis: max 5 per layer.
+- [ ] How many steps maximum per layer before user abandonment risk becomes significant? Hypothesis: max 5 per layer.
