@@ -1,6 +1,8 @@
 # Project North Star — Vision Document
 
-> Last updated: 2026-05-23
+> Last updated: 2026-05-24
+> Status: `discovery`
+> Owner: Kosta Stolbunsky
 
 ## Why this exists
 
@@ -16,7 +18,7 @@ An **interactive decision engine** — part quiz, part recommendation system, pa
 
 - **E2E coverage**: from ideation chat to production hosting, including orchestration, multi-agent roles, QA, security, legal, observability and cost
 - **Abstract model**: the internal model is fully technology-agnostic; tools are plug-in implementations, not hardcoded nodes
-- **Alternatives at every node**: not "the best tool" but "here are 3 options with trade-offs and pricing"
+- **Alternatives at every node**: not “the best tool” but “here are 3 options with trade-offs and pricing”
 - **Context-aware**: recommendations adapt based on user type (solo vs org), use case, constraints and priorities
 - **Transparent pricing**: real cost estimates at every layer, including free tiers, limits and hidden costs
 
@@ -29,7 +31,7 @@ An **interactive decision engine** — part quiz, part recommendation system, pa
 ## Design philosophy
 
 ### Abstract & agnostic
-All nodes in the model (e.g. "interactive reasoning chat", "research agent", "coding agent", "orchestrator", "artifact store", "governance layer") are abstract roles. Specific products (Claude, Perplexity, n8n, Vercel, etc.) are implementations assigned to these roles based on context.
+All nodes in the model (e.g. “interactive reasoning chat”, “research agent”, “coding agent”, “orchestrator”, “artifact store”, “governance layer”) are abstract roles. Specific products (Claude, Perplexity, n8n, Vercel, etc.) are implementations assigned to these roles based on context.
 
 ### Controllably extensible
 The model must support addition of new nodes, criteria, use cases and tool implementations without requiring structural changes. New dimensions can be added; existing logic remains valid.
