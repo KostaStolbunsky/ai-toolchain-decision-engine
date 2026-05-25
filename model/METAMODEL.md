@@ -1,9 +1,9 @@
 # Abstract Metamodel
 
-> Version: 0.1  
-> Status: Draft  
-> Date: 2026-05-24  
-> xleo task ref: T-001 / STO-31
+> Version: 0.2
+> Status: Draft
+> Date: 2026-05-26
+> xleo task ref: STO-31
 
 This document defines the abstract metamodel of the ATDE decision engine. It is the foundational schema — all other model artifacts (nodes, criteria, assessment flows, decision trees) are instances or extensions of this metamodel.
 
@@ -14,13 +14,14 @@ This document defines the abstract metamodel of the ATDE decision engine. It is 
 - All entities are **abstract** — no tool names, vendor names, or product-specific terms appear here.
 - All entities are **domain-agnostic** — valid for any AI toolchain, not just software development.
 - The model is **extensible** — new entities, roles, and connections can be added without breaking existing logic.
+- **Registry of types** — all extensible value sets live in `model/types/`; entity schemas reference them via `$ref` instead of hardcoding enum values.
 - **Immutability** — entity schemas are versioned. Breaking changes require a version bump.
 
 ---
 
 ## Core entities
 
-The metamodel has five core entity types:
+The metamodel has six core entity types:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -40,25 +41,25 @@ The metamodel has five core entity types:
 
 ### 1. ContextProfile
 
-Represents the user or organization that is seeking a recommendation. It is the **entry point** to the decision engine.
+Represents the user or organization seeking a recommendation. It is the **entry point** to the decision engine.
 
 ```yaml
 ContextProfile:
-  id: string                      # unique identifier
-  type: enum                      # solo | organization
-  dimensions:                     # key-value context dimensions
-    use_case: string              # primary intended use
-    maturity: enum                # early | growing | established | enterprise
-    scale: enum                   # individual | small_team | department | enterprise
-    budget_sensitivity: enum      # low | medium | high
-    stack_openness: enum          # open_source | mixed | proprietary
-    compliance_requirements: []   # list of named compliance needs
-    integration_constraints: []   # named existing systems to integrate with
-  entry_point: enum               # use_case_first | org_context_first
+  id: string
+  type: string                    # $ref: model/types/context-profile-types.md
+  dimensions:
+    use_case: string
+    maturity: string              # $ref: model/types/maturity-levels.md
+    scale: string                 # $ref: model/types/scale-levels.md
+    budget_sensitivity: string    # $ref: model/types/budget-sensitivity-levels.md
+    stack_openness: string        # $ref: model/types/stack-openness.md
+    compliance_requirements: []
+    integration_constraints: []
+  entry_point: string            # $ref: model/types/context-entry-points.md
 ```
 
 **Rules:**
-- `type` determines the assessment entry point (see STATUS_TRANSITIONS).
+- `type` determines the assessment entry point (solo vs. organization).
 - `dimensions` are populated progressively through the assessment flow.
 - At least `use_case` or `maturity + scale` must be present to enter the decision path.
 
@@ -70,106 +71,106 @@ Represents an **abstract functional role** in the AI toolchain lifecycle. A node
 
 ```yaml
 Node:
-  id: string                      # unique identifier, kebab-case
-  label: string                   # human-readable name
-  description: string             # what capability this node provides
-  stage: stage_id                 # which lifecycle stage this belongs to
-  inputs: [node_id]               # nodes that feed into this node
-  outputs: [node_id]              # nodes this node feeds into
-  required_by: [node_id]         # nodes that cannot function without this one
-  optional_for: [node_id]        # nodes this enhances but does not block
-  criteria: [criteria_id]         # evaluation criteria applicable to this node
-  implementations: [impl_id]      # registered tool implementations
-  cardinality: enum               # single | multiple | optional
-  extensible: boolean             # whether new implementations can be added freely
+  id: string
+  label: string
+  description: string
+  stage: stage_id
+  inputs: [node_id]
+  outputs: [node_id]
+  required_by: [node_id]
+  optional_for: [node_id]
+  criteria: [criteria_id]
+  implementations: [impl_id]
+  cardinality: string            # $ref: model/types/cardinalities.md
+  extensible: boolean
 ```
 
 **Rules:**
-- A node with `cardinality: single` means only one implementation should be active at a time.
-- A node with `cardinality: multiple` allows stacking implementations.
-- `extensible: false` means the implementation list is curated and frozen per version.
+- `cardinality: single` — only one active implementation at a time.
+- `cardinality: multiple` — stacking implementations is allowed.
+- `extensible: false` — implementation list is curated and frozen per version.
 
 ---
 
 ### 3. Implementation
 
-Represents a **concrete tool, product, or service** that fulfills a Node's role. Implementations are the leaves of the model — they are never abstract.
+Represents a **concrete tool, product, or service** that fulfills a Node's role. Implementations are the leaves of the model — never abstract.
 
 ```yaml
 Implementation:
-  id: string                      # unique identifier
-  label: string                   # product/tool name
-  node_id: node_id                # which node this implements
-  version: string                 # known version or "latest"
-  hosting: enum                   # cloud | self_hosted | hybrid
+  id: string
+  label: string
+  node_id: node_id
+  version: string
+  hosting: string                # $ref: model/types/hosting-types.md
   open_source: boolean
   license: string
-  criteria_scores:                # scored against node criteria
-    [criteria_id]: score          # high | medium | low
-  notes: string                   # free-text caveats or context
+  criteria_scores:
+    [criteria_id]: string        # $ref: model/types/score-values.md
+  notes: string
   last_reviewed: date
 ```
 
 **Rules:**
-- An implementation must reference exactly one `node_id`.
+- Must reference exactly one `node_id`.
 - `criteria_scores` must cover all `criteria` listed on the parent Node.
-- Implementations are versioned and reviewed on a defined cadence.
+- Reviewed on a defined cadence.
 
 ---
 
 ### 4. EvaluationFrame
 
-Represents the **weighted scoring context** applied to a specific ContextProfile. It maps criteria to weights based on the profile's dimensions.
+Represents the **weighted scoring context** for a specific ContextProfile.
 
 ```yaml
 EvaluationFrame:
   id: string
-  context_profile_id: string      # which profile this frame applies to
-  weights:                        # override default criteria weights
+  context_profile_id: string
+  weights:
     [criteria_id]: float          # 0.0 – 1.0, sum must equal 1.0
-  overrides:                      # hard rules that override scores
+  overrides:
     - criteria_id: string
-      condition: string           # e.g. "compliance_requirements includes GDPR"
-      action: enum                # exclude | require | boost | penalize
+      condition: string
+      action: string             # $ref: model/types/override-actions.md
 ```
 
 **Rules:**
-- Weights must sum to 1.0 within a frame.
-- `overrides` are applied before scoring — they can exclude implementations entirely.
-- A ContextProfile without a custom EvaluationFrame uses default criteria weights.
+- Weights must sum to 1.0.
+- Overrides are applied before scoring — they can exclude implementations entirely.
+- A profile without a custom EvaluationFrame uses default criteria weights.
 
 ---
 
 ### 5. DecisionPath
 
-Represents the **traversal route** through the node graph for a specific ContextProfile. It is generated dynamically — not stored statically.
+Represents the **traversal route** through the node graph. Generated dynamically — not stored statically.
 
 ```yaml
 DecisionPath:
   id: string
   context_profile_id: string
   evaluation_frame_id: string
-  steps:                          # ordered list of decision steps
+  steps:
     - step: integer
       node_id: string
-      question: string            # assessment question for this node
-      answer: string              # user's answer
-      candidates: [impl_id]       # implementations considered
-      filtered_out: [impl_id]     # implementations excluded and why
+      question: string
+      answer: string
+      candidates: [impl_id]
+      filtered_out: [impl_id]
       reason: string
-  status: enum                    # in_progress | complete | abandoned
+  status: string                 # $ref: model/types/decision-path-statuses.md
 ```
 
 **Rules:**
-- A DecisionPath is always tied to exactly one ContextProfile and one EvaluationFrame.
+- Always tied to exactly one ContextProfile and one EvaluationFrame.
 - Steps are sequential and cannot be skipped.
-- The path is complete when all required nodes have been evaluated.
+- Complete when all required nodes have been evaluated.
 
 ---
 
 ### 6. Recommendation
 
-Represents the **final output** of the decision engine for a given ContextProfile.
+Represents the **final output** of the decision engine.
 
 ```yaml
 Recommendation:
@@ -177,28 +178,26 @@ Recommendation:
   context_profile_id: string
   decision_path_id: string
   generated_at: datetime
-  output_type: enum               # single_tool | toolset | ranked_list | stack
+  output_type: string            # $ref: model/types/recommendation-output-types.md
   items:
     - node_id: string
       implementation_id: string
       score: float
-      rationale: string           # why this implementation was selected
-      alternatives: [impl_id]     # runner-up implementations
-      caveats: string             # known limitations or conditions
-  confidence: enum                # high | medium | low
-  review_required: boolean        # flag for human review before acting
+      rationale: string
+      alternatives: [impl_id]
+      caveats: string
+  confidence: string             # $ref: model/types/confidence-levels.md
+  review_required: boolean
 ```
 
 **Rules:**
-- Every recommendation must include `rationale` per item — no black-box outputs.
-- `confidence: low` or `review_required: true` must trigger a human-in-the-loop gate.
-- Recommendations are immutable after generation — create a new one rather than editing.
+- Every item must include `rationale` — no black-box outputs.
+- `confidence: low` or `review_required: true` triggers a UI warning (informational, not a gate).
+- Recommendations are immutable after generation.
 
 ---
 
 ## Lifecycle stages
-
-Stages are referenced by Node entities. They represent phases of the AI toolchain lifecycle.
 
 | Stage ID | Label |
 |---|---|
@@ -216,8 +215,6 @@ Stages are referenced by Node entities. They represent phases of the AI toolchai
 
 ## Connection types
 
-Connections between nodes define how capability slots relate to each other.
-
 | Type | Meaning |
 |---|---|
 | `feeds_into` | Output of node A is input to node B |
@@ -230,11 +227,9 @@ Connections between nodes define how capability slots relate to each other.
 
 ## Properties taxonomy
 
-All entity properties follow these base types:
-
 | Type | Values |
 |---|---|
-| `enum` | Predefined set, extensible via version bump |
+| `string (enum ref)` | Defined value set, referenced via `model/types/` |
 | `string` | Free text, no constraint |
 | `boolean` | true / false |
 | `float` | 0.0 – 1.0 |
@@ -252,8 +247,8 @@ All entity properties follow these base types:
 | Add new entity type | Minor version bump |
 | Change property type or name | Major version bump |
 | Remove entity type | Major version bump + deprecation notice |
-| Add new enum value | Minor version bump |
-| Remove enum value | Major version bump |
+| Add new value to a type registry | Minor version bump in that type file |
+| Remove value from a type registry | Major version bump in that type file |
 
 ---
 
