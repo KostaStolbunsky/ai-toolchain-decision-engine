@@ -1,0 +1,51 @@
+schema_version: "0.1"
+
+id: railway
+label: Railway
+node_id: hosting
+website: https://railway.app
+last_reviewed: 2026-05-25
+
+# Identity
+hosting: cloud
+open_source: false
+license: proprietary
+
+# Access
+api_access: true
+api_docs: https://docs.railway.app/reference/public-api
+model_agnostic: false  # not applicable for hosting
+
+# Pricing
+pricing_model: usage_based
+free_tier: true
+free_tier_limits: "$5 credit/month on Hobby plan; limited RAM and CPU"
+paid_tiers: "Pro plan (~$20/month base + usage); Team plan available"
+price_signal: low
+
+# Compliance & Geography
+data_residency: ["US", "EU"]
+compliance_certifications: ["SOC2"]
+no_training_on_data: true  # infrastructure provider; no AI training on hosted data
+
+# Integrations
+integrations:
+  - GitHub (native deploy from repo)
+  - Docker
+  - Railway CLI
+  - Postgres, Redis, MySQL (managed add-ons)
+  - Custom domains
+
+# Criteria scores
+criteria_scores:
+  security-compliance: medium  # SOC2, EU region available, but not HIPAA/enterprise-grade
+  integration-depth: medium    # strong GitHub/Docker integration; limited enterprise IAM
+  observability: medium        # built-in logs and metrics; no advanced APM or audit trail
+  cost-tco: high               # very low entry cost; predictable scaling
+  speed-delivery: high         # deploy from GitHub in minutes; zero infrastructure management
+
+notes: >
+  Excellent choice for solo developers and small teams who want fast, low-friction deployment.
+  EU region available which helps with GDPR basic compliance.
+  Not suitable for enterprise use cases requiring custom VPC, private networking,
+  SOC2 BAA, or HIPAA compliance. Consider AWS/GCP/Azure for enterprise.

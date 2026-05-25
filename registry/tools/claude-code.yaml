@@ -1,0 +1,50 @@
+schema_version: "0.1"
+
+id: claude-code
+label: Claude Code
+node_id: coding-agent
+website: https://claude.ai/code
+last_reviewed: 2026-05-25
+
+# Identity
+hosting: cloud
+open_source: false
+license: proprietary
+
+# Access
+api_access: true
+api_docs: https://docs.anthropic.com
+model_agnostic: false  # tied to Claude models (Anthropic)
+
+# Pricing
+pricing_model: usage_based
+free_tier: false
+free_tier_limits: "None — API access is paid per token"
+paid_tiers: "Anthropic API pricing per token; Claude Max subscription for interactive use (~$100/month)"
+price_signal: medium
+
+# Compliance & Geography
+data_residency: ["US"]
+compliance_certifications: ["SOC2"]
+no_training_on_data: true  # API data not used for training by default
+
+# Integrations
+integrations:
+  - Anthropic API (REST)
+  - MCP (Model Context Protocol)
+  - GitHub (via CLI and agentic loop)
+  - VS Code (unofficial)
+
+# Criteria scores
+criteria_scores:
+  security-compliance: medium  # SOC2 certified, but US-only data residency
+  integration-depth: high      # deep GitHub integration, MCP, strong API
+  observability: medium        # API-level logging available; no built-in audit trail
+  cost-tco: medium             # token costs can scale significantly at volume
+  speed-delivery: high         # agentic coding loop significantly accelerates delivery
+
+notes: >
+  Best-in-class for agentic coding tasks. Handles full edit/run/test cycles autonomously.
+  Token costs can be significant on large codebases — monitor usage carefully.
+  Not suitable for air-gapped or strict EU data residency environments without
+  enterprise Anthropic agreements.
