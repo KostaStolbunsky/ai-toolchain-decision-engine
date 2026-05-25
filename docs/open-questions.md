@@ -7,12 +7,12 @@
 ## 🟡 Model Architecture
 
 - [ ] **Criteria schema — additional criteria**: `vendor-lock-in`, `self-hosting`, `api-access`, `model-agnostic`, `community-support`, `enterprise-sla`, `data-privacy` are listed but not yet fully defined with weights and applicable stages.
-- [ ] **Tool registry structure**: How do tools get registered? What fields are required (name, role, pricing, limits, integrations, compliance, geography, API access)?
-- [ ] **Scoring / ranking logic**: How does the engine turn answers into a scored recommendation? Rule-based, weighted matrix, AI-assisted or hybrid?
+- [ ] **Scoring / ranking logic**: Algorithm designed (see model/scoring.md — in progress, STO-36). Override conflict resolution and confidence thresholds pending.
 - [ ] **DecisionPath steps**: Should steps map 1:1 to assessment questions, or can one step span multiple questions?
 - [ ] **Recommendation output type**: Should `Recommendation.output_type` be set by the engine or by the user's preference?
-- [ ] **EvaluationFrame conflict resolution**: How are conflicting `overrides` resolved — first match, priority order, or union?
 - [ ] **ContextProfile mutability**: Should a ContextProfile be mutable during the assessment flow, or locked after the first step?
+- [ ] **Registry lifecycle fields**: `status`, `data_source`, `contributed_by`, `last_verified` need to be added to tool-registry schema (follow-up to STO-35).
+- [ ] **Agent pipeline — source credibility scoring**: How does the agent evaluate the trustworthiness of a data source when discovering new tools? Needs a credibility model to resist manipulation.
 
 ---
 
@@ -21,7 +21,7 @@
 - [ ] Define sub-categories for each major use case type
 - [ ] Fill `lifecycle_emphasis` and `example_patterns` per use case in the taxonomy schema
 - [ ] Map typical toolchain patterns per use case type
-- [ ] Identify edge cases and hybrid scenarios (e.g. “internal tool that becomes a SaaS”)
+- [ ] Identify edge cases and hybrid scenarios (e.g. "internal tool that becomes a SaaS")
 
 ---
 
@@ -35,6 +35,7 @@
 - [ ] **Saving / sharing configurations**: Do users need accounts? Anonymous sessions? Shareable links?
 - [ ] **Progressive disclosure**: How do we reveal complexity without overwhelming novice users?
 - [ ] **Max steps per layer**: How many questions maximum before user abandonment risk? Hypothesis: max 5.
+- [ ] **review_required UX**: How does the UI surface low-confidence recommendations? Warning banner, confidence indicator, or separate "uncertain" state?
 
 ---
 
@@ -72,6 +73,21 @@
 
 ---
 
+## 🔒 Platform Security
+
+> Dedicated section. Security is a cross-cutting concern that touches every layer of the platform.
+> Full discussion tracked in STO-37.
+
+- [ ] **Registry poisoning via agent**: Agent discovers a tool that was artificially surfaced (SEO manipulation, fake reviews, synthetic mentions). How does source credibility scoring prevent this?
+- [ ] **User submission abuse**: Users submitting tools to promote their own products, directly or indirectly. Conflict-of-interest detection mechanism needed.
+- [ ] **Scoring manipulation**: Can a bad actor influence criteria scores or weights to favour a specific tool? How is the scoring pipeline protected?
+- [ ] **Supply chain integrity**: How do we verify that registry entries actually describe what the tool does, and not what the vendor claims?
+- [ ] **API abuse**: Rate limiting, authentication, and abuse prevention for the recommendation API.
+- [ ] **Data privacy in contributions**: What data is collected from users who submit tools or use the engine? GDPR/compliance implications.
+- [ ] **Audit trail integrity**: Can the human override log be tampered with? How is it protected?
+
+---
+
 ## ✅ Resolved Decisions
 
 | Decision | Resolution | Date |
@@ -89,3 +105,8 @@
 | Decision tree — first layer | Layer 0 and Layer 1 (solo, department, enterprise) defined in model/DECISION_TREE.md | 2026-05-24 |
 | Assessment flows | Solo and org entry point flows defined in assessment/ASSESSMENT_SOLO.md and assessment/ASSESSMENT_ORG.md | 2026-05-24 |
 | Assessment terminology | Renamed quiz → assessment across all model and assessment files | 2026-05-24 |
+| Tool registry schema | YAML-in-Git, one file per tool in registry/tools/. Schema defined in model/tool-registry.md | 2026-05-25 |
+| review_required behaviour | Informational flag only (Variant A) — UI warning, not a blocking gate. No approval workflow for MVP. | 2026-05-25 |
+| Contribution pipeline | Single unified pipeline for agent-discovered and user-submitted tools. Source tagged via data_source field. | 2026-05-25 |
+| Human override model | Audit trail + override right. Human can intervene at any point but is not a required step. Agent is primary decision maker. | 2026-05-25 |
+| Registry as living system | Registry is not static. Requires status, data_source, contributed_by, last_verified fields. Agent handles updates autonomously. | 2026-05-25 |
