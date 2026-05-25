@@ -15,6 +15,7 @@ The engine is abstract by design — it works with roles and criteria, not produ
 ## Core Principles
 
 - **Abstract & agnostic** — all nodes, datasets, taxonomies, and rules are domain- and technology-agnostic
+- **Registry of types** — all extensible value sets live in `model/types/`; no enum values are hardcoded in schemas or code
 - **Living registry** — tools are discovered, verified, and updated autonomously; humans retain override rights
 - **Controllably extensible** — the model grows in all directions without breaking existing logic
 - **Two-mode UX** — simplified wizard for general users, advanced interface for professionals
@@ -62,24 +63,32 @@ Weights are adjustable per context profile via the EvaluationFrame.
 
 ```
 /
-├── README.md                   # This file
-├── adr/                        # Architecture Decision Records
-├── assessment/                 # Assessment flows (solo and org entry points)
+├── README.md                        # This file
+├── adr/                             # Architecture Decision Records
+├── assessment/                      # Assessment flows (solo and org entry points)
 │   ├── ASSESSMENT_SOLO.md
 │   └── ASSESSMENT_ORG.md
-├── docs/                       # Project documentation
-│   ├── open-questions.md       # Open decisions and topics for discussion
-│   └── session-notes/          # Session notes for continuity
-├── model/                      # Abstract decision model
-│   ├── METAMODEL.md            # Core entity schema (ContextProfile, Node, Implementation, EvaluationFrame, DecisionPath, Recommendation)
-│   ├── DECISION_TREE.md        # Layer 0 and Layer 1 decision routing
-│   ├── nodes.md                # 14 abstract node types across 9 lifecycle stages
-│   ├── use-cases.md            # Use case taxonomy (10 top-level categories)
-│   ├── criteria.md             # Evaluation criteria schema and default weights
-│   ├── scoring.md              # Scoring and ranking algorithm (4 phases, worked example)
-│   └── tool-registry.md        # Tool registry schema and contribution guide
-└── registry/                   # Concrete tool implementations
-    └── tools/                  # One YAML file per registered tool
+├── docs/                            # Project documentation
+│   ├── open-questions.md            # Open decisions and topics for discussion
+│   └── session-notes/               # Session notes for continuity
+├── model/                           # Abstract decision model
+│   ├── METAMODEL.md                 # Core entity schema
+│   ├── DECISION_TREE.md             # Layer 0 and Layer 1 decision routing
+│   ├── nodes.md                     # 14 abstract node types across 9 lifecycle stages
+│   ├── use-cases.md                 # Use case taxonomy (10 top-level categories)
+│   ├── criteria.md                  # Evaluation criteria schema and default weights
+│   ├── scoring.md                   # Scoring and ranking algorithm (4 phases, worked example)
+│   ├── tool-registry.md             # Tool registry schema and contribution guide
+│   └── types/                       # Type registries — all extensible value sets
+│       ├── README.md                # Index and extension guide
+│       ├── lifecycle-statuses.md    # draft | active | deprecated
+│       ├── data-sources.md          # agent_discovery | user_submission | manual
+│       ├── hosting-types.md         # cloud | self_hosted | hybrid
+│       ├── score-values.md          # high | medium | low → 1.0 / 0.5 / 0.0
+│       ├── price-signals.md         # low | medium | high
+│       └── confidence-levels.md     # high | medium | low + thresholds
+└── registry/                        # Concrete tool implementations
+    └── tools/                       # One YAML file per registered tool
         ├── perplexity.yaml
         ├── claude-code.yaml
         └── railway.yaml
@@ -97,9 +106,10 @@ Weights are adjustable per context profile via the EvaluationFrame.
 | Node types (14 nodes, 9 stages) | ✅ Done |
 | Use case taxonomy (top level) | ✅ Done |
 | Criteria schema | ✅ Done (primary criteria) |
-| Tool registry schema | ✅ Done — v0.1 |
-| Scoring & ranking logic | ✅ Done — v0.1 |
-| Registry lifecycle / contribution pipeline | 🟡 In progress |
+| Type registries | ✅ Done — v0.1 |
+| Tool registry schema | ✅ Done — v0.3 |
+| Scoring & ranking logic | ✅ Done — v0.2 |
+| Registry lifecycle / contribution pipeline | ✅ Done |
 | Security / threat model | 🔴 Planned — STO-37 |
 | UX design | 🔴 Not started |
 
@@ -109,9 +119,17 @@ Weights are adjustable per context profile via the EvaluationFrame.
 
 The tool registry lives in `registry/tools/`. Each file is a YAML entry describing a concrete tool: its node role, pricing, compliance, integrations, and criteria scores.
 
-Registry entries have a lifecycle: `draft → active → deprecated`. They are created and updated by an autonomous agent and open to community contribution via pull request. All entries carry `data_source`, `contributed_by`, and `last_verified` fields for traceability.
+Registry entries have a lifecycle defined in [`model/types/lifecycle-statuses.md`](model/types/lifecycle-statuses.md). They are created and updated by an autonomous agent and open to community contribution via pull request.
 
 See [`model/tool-registry.md`](model/tool-registry.md) for the full schema and contribution guide.
+
+---
+
+## Type Registries
+
+All extensible value sets (statuses, sources, score values, confidence levels, etc.) live in [`model/types/`](model/types/). No enum values are hardcoded in schemas or engine code.
+
+Adding a new value = one entry in one file. No schema changes. No code changes.
 
 ---
 
@@ -129,4 +147,4 @@ Security is a cross-cutting concern in ATDE. Key threat vectors include registry
 
 ## Status
 
-🟡 Active design — model layer near complete, UX and implementation not started
+🟡 Active design — model layer complete, UX and implementation not started
