@@ -1,11 +1,13 @@
 # Tool Registry
 
-> Version: 0.2  
+> Version: 0.3  
 > Status: Draft  
 > Date: 2026-05-25  
 > xleo task ref: STO-35
 
 This document defines the schema for registering concrete tools as implementations of abstract nodes. All tool data lives in `registry/tools/` as individual YAML files — one file per tool.
+
+All type references in this schema point to `model/types/`. No enum values are defined inline.
 
 ---
 
@@ -14,7 +16,7 @@ This document defines the schema for registering concrete tools as implementatio
 - **Format:** YAML, one file per tool
 - **Location:** `registry/tools/<tool-id>.yaml`
 - **Naming:** kebab-case, e.g. `perplexity.yaml`, `claude-code.yaml`
-- **Versioning:** changes to existing entries require updating `last_verified` and bumping the file-level `schema_version` if the schema itself changed
+- **Versioning:** changes to existing entries require updating `last_verified`; schema changes require bumping `schema_version`
 - **Additions:** new tools are added via PR or autonomous agent pipeline; see contribution guide below
 
 ---
@@ -26,63 +28,54 @@ schema_version: string        # registry schema version this entry conforms to
 
 id: string                    # unique tool identifier, kebab-case
 label: string                 # official product/tool name
-node_id: string               # which abstract node this implements (from nodes.md)
+node_id: string               # $ref: model/nodes.md — which abstract node this implements
 website: url                  # official product URL
 
 ## Lifecycle
-status: enum                  # draft | active | deprecated
-data_source: enum             # agent_discovery | user_submission | manual
+status: string                # $ref: model/types/lifecycle-statuses.md
+data_source: string           # $ref: model/types/data-sources.md
 contributed_by: string        # agent ID, GitHub username, or "maintainer"
-last_verified: date           # ISO 8601 — when entry data was last verified against the actual product
+last_verified: date           # ISO 8601 — when entry data was last verified
 
 ## Identity
-hosting: enum                 # cloud | self_hosted | hybrid
+hosting: string               # $ref: model/types/hosting-types.md
 open_source: boolean
 license: string               # SPDX identifier or "proprietary"
 
 ## Access
-api_access: boolean           # programmatic API available (not UI-only)
-api_docs: url                 # link to API documentation, if available
-model_agnostic: boolean       # can swap underlying AI model
+api_access: boolean
+api_docs: url
+model_agnostic: boolean
 
 ## Pricing
-pricing_model: enum           # free | freemium | subscription | usage_based | enterprise | open_source
+pricing_model: string         # free | freemium | subscription | usage_based | enterprise | open_source
 free_tier: boolean
-free_tier_limits: string      # brief description of free tier limits
-paid_tiers: string            # brief description of paid options
-price_signal: enum            # low | medium | high   (relative cost signal for EvaluationFrame)
+free_tier_limits: string
+paid_tiers: string
+price_signal: string          # $ref: model/types/price-signals.md
 
 ## Compliance & Geography
-data_residency: [string]      # e.g. ["EU", "US"] — where data can be stored
-compliance_certifications: [] # e.g. ["SOC2", "ISO27001", "GDPR", "HIPAA"]
-no_training_on_data: boolean  # vendor commitment not to train on user data
+data_residency: [string]
+compliance_certifications: []
+no_training_on_data: boolean
 
 ## Integrations
-integrations: []              # named systems this tool integrates with natively
+integrations: []
 
 ## Criteria scores
-# Score each criterion applicable to the parent node: high | medium | low
 criteria_scores:
-  security-compliance: enum   # high | medium | low
-  integration-depth: enum
-  observability: enum
-  cost-tco: enum
-  speed-delivery: enum
-  # include only criteria applicable to the node; omit others
+  [criteria_id]: string       # $ref: model/types/score-values.md
+  # include only criteria applicable to the parent node
 
 ## Notes
-notes: string                 # free-text caveats, known limitations, or important context
+notes: string
 ```
 
 ---
 
 ## Lifecycle states
 
-| Status | Meaning |
-|---|---|
-| `draft` | Entry created but not yet verified — not used by scoring engine |
-| `active` | Verified and live — used by scoring engine |
-| `deprecated` | Tool no longer recommended or discontinued — excluded from scoring, retained for history |
+See [`model/types/lifecycle-statuses.md`](types/lifecycle-statuses.md) for all valid values, transition rules, and extension guide.
 
 Only `active` entries are included in scoring.
 
@@ -90,39 +83,25 @@ Only `active` entries are included in scoring.
 
 ## Data sources
 
-| Source | Meaning |
-|---|---|
-| `agent_discovery` | Entry created or updated by the autonomous registry agent |
-| `user_submission` | Submitted by a community contributor via pull request or submission form |
-| `manual` | Created directly by a maintainer |
-
-All sources go through the same verification pipeline. Source is recorded for traceability and conflict-of-interest review.
+See [`model/types/data-sources.md`](types/data-sources.md) for all valid values and trust model.
 
 ---
 
-## Criteria score definitions
+## Criteria score values
 
-| Score | Meaning |
-|---|---|
-| `high` | Strongly satisfies this criterion — minimal risk or friction |
-| `medium` | Partially satisfies — acceptable with caveats |
-| `low` | Weak or unverified — significant risk or friction |
+See [`model/types/score-values.md`](types/score-values.md) for all valid values and numeric mappings.
 
 ---
 
 ## Contribution guide
 
-Anyone can propose a new tool or update an existing entry:
-
 1. Fork the repository
 2. Create or update a YAML file in `registry/tools/`
 3. Set `status: draft` and `data_source: user_submission`
 4. Set `contributed_by` to your GitHub username
-5. Open a pull request — the review checklist will be applied automatically
+5. Open a pull request — the review checklist will be applied
 
-The autonomous agent may also create entries directly as `agent_discovery`. These follow the same schema and go through the same verification pipeline.
-
-Maintainers and the agent have the right to promote entries to `active`, `deprecated`, or reject submissions. Humans retain final override on any agent decision.
+The autonomous agent creates entries as `agent_discovery`. All sources go through the same verification pipeline. Humans retain final override on any agent decision.
 
 ---
 
@@ -132,14 +111,13 @@ Maintainers and the agent have the right to promote entries to `active`, `deprec
 |---|---|
 | Add new optional field | Update schema, bump minor version |
 | Rename or remove field | Update schema, bump major version, migrate all entries |
-| Add new enum value | Update schema docs, no migration needed |
+| Add new type value | Update relevant file in `model/types/` only — no schema change |
 | Update a tool entry | Update `last_verified`, no schema bump needed |
 
 ---
 
 ## Open questions
 
-- [ ] Should `criteria_scores` be structured scores (with evidence/source) or just a rating?
-- [ ] Should tools with `node_id` spanning multiple nodes be registered once or once per node?
-- [ ] How do we handle tools that change pricing or compliance status frequently — automated staleness detection?
-- [ ] What is the verification pipeline for `agent_discovery` entries — which checks are mandatory before promoting to `active`?
+- [ ] Should `criteria_scores` carry evidence/source references, or rating only?
+- [ ] Should tools spanning multiple nodes be registered once or once per node?
+- [ ] What is the mandatory verification checklist for `agent_discovery` entries before promotion to `active`?

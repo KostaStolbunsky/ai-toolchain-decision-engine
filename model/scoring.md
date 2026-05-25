@@ -1,12 +1,14 @@
 # Scoring & Ranking Logic
 
-> Version: 0.1  
+> Version: 0.2  
 > Status: Draft  
 > Date: 2026-05-25  
 > xleo task ref: STO-36  
-> Depends on: METAMODEL.md, model/criteria.md, model/tool-registry.md
+> Depends on: METAMODEL.md, model/criteria.md, model/tool-registry.md, model/types/
 
 This document defines how the ATDE engine converts a populated `ContextProfile` and `EvaluationFrame` into a scored `Recommendation`. The algorithm is rule-based and fully deterministic — no AI inference in the scoring pipeline itself.
+
+All type values (score values, confidence levels) are defined in `model/types/` and referenced here — not hardcoded.
 
 ---
 
@@ -33,24 +35,22 @@ Overrides are hard rules defined in the `EvaluationFrame`. They run **before** a
 
 | Action | Effect |
 |---|---|
-| `exclude` | Implementation is removed from the candidate pool entirely. Cannot be recovered by score. |
-| `require` | All implementations that do NOT satisfy this criterion are excluded. |
-| `boost` | Adds +0.15 to the final score of qualifying implementations (applied in Phase 3). |
-| `penalize` | Subtracts -0.15 from the final score of qualifying implementations (applied in Phase 3). |
+| `exclude` | Implementation removed from candidate pool. Cannot be recovered by score. |
+| `require` | Implementations not satisfying this criterion are excluded. |
+| `boost` | Adds `+0.15` to the final score of qualifying implementations (Phase 3). |
+| `penalize` | Subtracts `-0.15` from the final score of qualifying implementations (Phase 3). |
 
 ### Conflict resolution
 
-When multiple overrides apply to the same implementation:
-
-1. `exclude` always wins — if any override excludes an implementation, it is out regardless of other rules.
-2. `require` is evaluated next — if the implementation fails a `require` condition, it is excluded.
-3. `boost` and `penalize` are additive — multiple boosts or penalties stack, but the final adjusted score is clamped to `[0.0, 1.0]`.
-4. If two overrides conflict (e.g. `boost` and `penalize` on the same criterion), both are applied and they partially cancel out.
-5. Override order within the same action type follows declaration order in the EvaluationFrame.
+1. `exclude` always wins — any exclude overrides all other rules for that implementation.
+2. `require` evaluated next — fail = exclude.
+3. `boost` and `penalize` are additive — multiple stack, final score clamped to `[0.0, 1.0]`.
+4. Conflicting boost + penalize on same criterion — both applied, partial cancellation.
+5. Same-action conflicts resolved by declaration order in the EvaluationFrame.
 
 ### Output of Phase 1
 
-A filtered candidate pool: implementations that passed all `exclude` and `require` rules.
+Filtered candidate pool — implementations that passed all `exclude` and `require` rules.
 
 ---
 
@@ -58,50 +58,50 @@ A filtered candidate pool: implementations that passed all `exclude` and `requir
 
 ### Score mapping
 
-Criteria scores in the registry use a three-point scale. They are mapped to numeric values:
+Qualitative score values are defined in [`model/types/score-values.md`](types/score-values.md). Current mapping:
 
-| Registry score | Numeric value |
+| Score value ID | Numeric value |
 |---|---|
-| `high` | 1.0 |
-| `medium` | 0.5 |
-| `low` | 0.0 |
+| `high` | `1.0` |
+| `medium` | `0.5` |
+| `low` | `0.0` |
+
+The engine reads numeric values from the type registry — not from hardcoded constants.
 
 ### Weighted sum formula
 
 For each implementation that survived Phase 1:
 
 ```
-raw_score = Σ (criteria_weight[i] × criteria_score_numeric[i])
+raw_score = Σ (criteria_weight[i] × score_numeric[i])
             for all criteria applicable to the node
 ```
 
 Where:
-- `criteria_weight[i]` comes from the `EvaluationFrame.weights` (or default weights from `criteria.md` if no custom frame)
-- `criteria_score_numeric[i]` is the mapped numeric value from the registry entry
-- Weights must sum to 1.0 — enforced at EvaluationFrame creation
+- `criteria_weight[i]` — from `EvaluationFrame.weights`, or default from `criteria.md`
+- `score_numeric[i]` — numeric mapping from `model/types/score-values.md`
+- Weights must sum to `1.0` — enforced at EvaluationFrame creation
 
-### Score range
+### Final score (after Phase 1 adjustments)
 
-`raw_score` is always in `[0.0, 1.0]` before boost/penalize adjustments.
-
-After boost/penalize from Phase 1 overrides, the score is clamped:
 ```
-final_score = clamp(raw_score + boost_delta - penalize_delta, 0.0, 1.0)
+final_score = clamp(raw_score + boost_delta − penalize_delta, 0.0, 1.0)
 ```
 
 ---
 
 ## Phase 3 — Ranking
 
-Implementations are sorted by `final_score` descending.
+Sort by `final_score` descending.
 
-- **Winner**: highest scoring implementation → `Recommendation.items[0]`
-- **Alternatives**: remaining candidates in score order → `Recommendation.items[1..n]`
-- **Filtered out**: implementations excluded in Phase 1, with reason recorded in `DecisionPath.steps[].filtered_out`
+- **Winner** → `Recommendation.items[0]`
+- **Alternatives** → remaining candidates in score order
+- **Filtered out** → recorded in `DecisionPath.steps[].filtered_out` with reason
 
-If two implementations have equal `final_score`, the tie is broken by:
-1. Higher `speed-delivery` score (favours faster time-to-value)
-2. Higher `cost-tco` score (favours lower cost)
+### Tie-breaking (equal `final_score`)
+
+1. Higher `speed-delivery` score
+2. Higher `cost-tco` score
 3. Alphabetical by `id` (deterministic fallback)
 
 ---
@@ -110,32 +110,33 @@ If two implementations have equal `final_score`, the tie is broken by:
 
 ### Confidence levels
 
+Defined in [`model/types/confidence-levels.md`](types/confidence-levels.md). Current thresholds:
+
 | Level | Conditions |
 |---|---|
-| `high` | ≥ 3 candidates evaluated AND winner score ≥ 0.7 AND gap between 1st and 2nd ≥ 0.15 |
-| `medium` | 2+ candidates evaluated AND winner score ≥ 0.5 AND gap ≥ 0.05 |
-| `low` | Fewer than 2 candidates, OR winner score < 0.5, OR gap < 0.05 |
+| `high` | ≥3 candidates AND winner score ≥`0.7` AND gap ≥`0.15` |
+| `medium` | ≥2 candidates AND winner score ≥`0.5` AND gap ≥`0.05` |
+| `low` | <2 candidates OR winner score <`0.5` OR gap <`0.05` |
 
-Gap = `score[rank_1] - score[rank_2]`. If only one candidate survived Phase 1, gap = 1.0 (no competitor) but confidence is capped at `medium` due to limited pool.
+All thresholds are defined in `model/types/confidence-levels.md`. Change a threshold there — the engine picks it up automatically.
+
+**Gap** = `score[rank_1] − score[rank_2]`. Single survivor: gap = `1.0`, confidence capped at `medium`.
 
 ### review_required flag
 
-`review_required: true` is set when ANY of the following conditions are met:
-
+`review_required: true` when ANY of:
 - `confidence: low`
-- All surviving candidates have `final_score < 0.4` (no good fit found)
+- All candidates have `final_score < 0.4`
 - Fewer than 2 candidates survived Phase 1
-- Winner and second place are separated by less than `0.05` (effectively a tie)
+- Gap between 1st and 2nd < `0.05`
 
-`review_required` is **informational only** — it does not block the recommendation. The UI surfaces it as a warning to the user.
+`review_required` is **informational only** — UI warning, not a blocking gate.
 
 ---
 
 ## Worked example
 
-### Context
-
-A solo developer building a prototype, budget-sensitive, no compliance requirements.
+### Context — solo developer, budget-sensitive prototype
 
 ```yaml
 ContextProfile:
@@ -148,86 +149,51 @@ ContextProfile:
     compliance_requirements: []
 ```
 
-### EvaluationFrame (budget-sensitive solo)
-
-Default weights adjusted for high budget sensitivity:
+### EvaluationFrame
 
 ```yaml
 EvaluationFrame:
   weights:
-    security-compliance: 0.10   # reduced — no compliance requirements
-    integration-depth:   0.15   # reduced — solo, minimal integration needs
-    observability:       0.10   # reduced — prototype, not production
-    cost-tco:            0.40   # boosted — budget is primary concern
-    speed-delivery:      0.25   # boosted — prototype speed matters
-  overrides: []                 # no hard exclusions
+    security-compliance: 0.10
+    integration-depth:   0.15
+    observability:       0.10
+    cost-tco:            0.40
+    speed-delivery:      0.25
+  overrides: []
 ```
 
-Weights sum: 0.10 + 0.15 + 0.10 + 0.40 + 0.25 = **1.00** ✓
-
-### Candidates for node: `ideation-chat`
-
-From registry (using perplexity.yaml as example; assume two more candidates exist):
+### Candidates for node `ideation-chat`
 
 | Implementation | security-compliance | integration-depth | observability | cost-tco | speed-delivery |
 |---|---|---|---|---|---|
-| `perplexity` | low (0.0) | medium (0.5) | low (0.0) | high (1.0) | high (1.0) |
-| `candidate-b` | medium (0.5) | high (1.0) | medium (0.5) | medium (0.5) | medium (0.5) |
-| `candidate-c` | high (1.0) | medium (0.5) | high (1.0) | low (0.0) | medium (0.5) |
+| `perplexity` | low → 0.0 | medium → 0.5 | low → 0.0 | high → 1.0 | high → 1.0 |
+| `candidate-b` | medium → 0.5 | high → 1.0 | medium → 0.5 | medium → 0.5 | medium → 0.5 |
+| `candidate-c` | high → 1.0 | medium → 0.5 | high → 1.0 | low → 0.0 | medium → 0.5 |
 
-### Phase 1 — Override filtering
+### Phase 1 — no overrides → all 3 pass
 
-No overrides defined → all 3 candidates pass.
-
-### Phase 2 — Score calculation
+### Phase 2 — scores
 
 ```
-perplexity:  (0.10×0.0) + (0.15×0.5) + (0.10×0.0) + (0.40×1.0) + (0.25×1.0)
-           = 0.00 + 0.075 + 0.00 + 0.40 + 0.25 = 0.725
-
-candidate-b: (0.10×0.5) + (0.15×1.0) + (0.10×0.5) + (0.40×0.5) + (0.25×0.5)
-           = 0.05 + 0.15 + 0.05 + 0.20 + 0.125 = 0.575
-
-candidate-c: (0.10×1.0) + (0.15×0.5) + (0.10×1.0) + (0.40×0.0) + (0.25×0.5)
-           = 0.10 + 0.075 + 0.10 + 0.00 + 0.125 = 0.400
+perplexity:  (0.10×0.0)+(0.15×0.5)+(0.10×0.0)+(0.40×1.0)+(0.25×1.0) = 0.725
+candidate-b: (0.10×0.5)+(0.15×1.0)+(0.10×0.5)+(0.40×0.5)+(0.25×0.5) = 0.575
+candidate-c: (0.10×1.0)+(0.15×0.5)+(0.10×1.0)+(0.40×0.0)+(0.25×0.5) = 0.400
 ```
 
-No boosts or penalties → final scores equal raw scores.
+### Phase 3 — ranking
 
-### Phase 3 — Ranking
-
-| Rank | Implementation | Score |
+| Rank | Tool | Score |
 |---|---|---|
 | 1 | `perplexity` | 0.725 |
 | 2 | `candidate-b` | 0.575 |
 | 3 | `candidate-c` | 0.400 |
 
-Gap between 1st and 2nd: 0.725 − 0.575 = **0.150**
+Gap = 0.725 − 0.575 = **0.150**
 
-### Phase 4 — Confidence
+### Phase 4 — confidence
 
-- Candidates evaluated: 3 ✓
-- Winner score: 0.725 ≥ 0.7 ✓
-- Gap: 0.150 ≥ 0.15 ✓
-
-→ `confidence: high`  
-→ `review_required: false`
-
-### Resulting Recommendation (partial)
-
-```yaml
-Recommendation:
-  output_type: ranked_list
-  items:
-    - node_id: ideation-chat
-      implementation_id: perplexity
-      score: 0.725
-      rationale: "Best fit for budget-sensitive solo prototype: highest cost-tco and speed-delivery scores match the EvaluationFrame weights."
-      alternatives: [candidate-b, candidate-c]
-      caveats: "Low security-compliance score — not suitable if compliance requirements are added later."
-  confidence: high
-  review_required: false
-```
+- Candidates: 3 ✓ — Score: 0.725 ≥ 0.7 ✓ — Gap: 0.150 ≥ 0.15 ✓
+- `confidence: high` — `review_required: false`
 
 ---
 
@@ -235,16 +201,16 @@ Recommendation:
 
 | Situation | Behaviour |
 |---|---|
-| All candidates excluded by overrides | Recommendation has 0 items for this node; `confidence: low`; `review_required: true`; rationale explains which override excluded all candidates |
-| Only 1 candidate survives | That candidate is the winner; confidence capped at `medium`; `review_required: true` |
-| All scores identical | Tie-breaking rules apply (speed-delivery → cost-tco → alphabetical) |
-| Node has `cardinality: multiple` | Top N implementations are all included as primary items, not alternatives |
-| Missing criteria score in registry | Treated as `low (0.0)` with a warning flag on the Recommendation item |
+| All candidates excluded | 0 items for node; `confidence: low`; `review_required: true`; reason recorded |
+| 1 candidate survives | Winner by default; confidence capped at `medium`; `review_required: true` |
+| All scores identical | Tie-breaking rules apply |
+| `cardinality: multiple` node | Top N are all primary items, not alternatives |
+| Missing criteria score | Treated as `low` (→ `0.0`) with warning flag on Recommendation item |
 
 ---
 
 ## Open questions
 
-- [ ] Should `boost` and `penalize` delta values (currently ±0.15) be configurable per EvaluationFrame, or fixed globally?
-- [ ] For `cardinality: multiple` nodes, what is the maximum N? Fixed cap or profile-driven?
-- [ ] Should the rationale be generated by an AI model or constructed from a template? Template is simpler and more predictable; AI rationale is more natural.
+- [ ] Should `boost`/`penalize` delta (`±0.15`) be configurable per EvaluationFrame, or stay as a type registry constant?
+- [ ] For `cardinality: multiple` nodes — what is the maximum N? Fixed cap or profile-driven?
+- [ ] Should rationale text be template-generated or AI-generated?
