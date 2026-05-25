@@ -1,0 +1,62 @@
+# SEED ENTRY — canonical example for development and testing
+# Live registry lives in the database. See registry/README.md
+
+schema_version: "0.2"
+
+id: claude-code
+label: Claude Code
+node_id: coding-agent
+website: https://claude.ai/code
+
+# Lifecycle
+# $ref: model/types/lifecycle-statuses.md
+status: active
+# $ref: model/types/data-sources.md
+data_source: manual
+contributed_by: maintainer
+last_verified: 2026-05-25
+
+# Identity
+# $ref: model/types/hosting-types.md
+hosting: cloud
+open_source: false
+license: proprietary
+
+# Access
+api_access: true
+api_docs: https://docs.anthropic.com
+model_agnostic: false
+
+# Pricing
+pricing_model: usage_based
+free_tier: false
+free_tier_limits: "None — API access is paid per token"
+paid_tiers: "Anthropic API pricing per token; Claude Max subscription (~$100/month)"
+# $ref: model/types/price-signals.md
+price_signal: medium
+
+# Compliance & Geography
+data_residency: ["US"]
+compliance_certifications: ["SOC2"]
+no_training_on_data: true
+
+# Integrations
+integrations:
+  - Anthropic API (REST)
+  - MCP (Model Context Protocol)
+  - GitHub (via CLI and agentic loop)
+  - VS Code (unofficial)
+
+# Criteria scores
+# $ref: model/types/score-values.md
+criteria_scores:
+  security-compliance: medium
+  integration-depth: high
+  observability: medium
+  cost-tco: medium
+  speed-delivery: high
+
+notes: >
+  Best-in-class for agentic coding tasks. Token costs can be significant on large
+  codebases. Not suitable for air-gapped or strict EU data residency environments
+  without enterprise Anthropic agreements.

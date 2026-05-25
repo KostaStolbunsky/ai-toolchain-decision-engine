@@ -1,0 +1,63 @@
+# SEED ENTRY — canonical example for development and testing
+# Live registry lives in the database. See registry/README.md
+
+schema_version: "0.2"
+
+id: railway
+label: Railway
+node_id: hosting
+website: https://railway.app
+
+# Lifecycle
+# $ref: model/types/lifecycle-statuses.md
+status: active
+# $ref: model/types/data-sources.md
+data_source: manual
+contributed_by: maintainer
+last_verified: 2026-05-25
+
+# Identity
+# $ref: model/types/hosting-types.md
+hosting: cloud
+open_source: false
+license: proprietary
+
+# Access
+api_access: true
+api_docs: https://docs.railway.app/reference/public-api
+model_agnostic: false
+
+# Pricing
+pricing_model: usage_based
+free_tier: true
+free_tier_limits: "$5 credit/month on Hobby plan"
+paid_tiers: "Pro plan (~$20/month base + usage)"
+# $ref: model/types/price-signals.md
+price_signal: low
+
+# Compliance & Geography
+data_residency: ["US", "EU"]
+compliance_certifications: ["SOC2"]
+no_training_on_data: true
+
+# Integrations
+integrations:
+  - GitHub (native deploy from repo)
+  - Docker
+  - Railway CLI
+  - Postgres, Redis, MySQL (managed add-ons)
+  - Custom domains
+
+# Criteria scores
+# $ref: model/types/score-values.md
+criteria_scores:
+  security-compliance: medium
+  integration-depth: medium
+  observability: medium
+  cost-tco: high
+  speed-delivery: high
+
+notes: >
+  Excellent for solo developers and small teams. EU region available for basic
+  GDPR compliance. Not suitable for enterprise requiring custom VPC, HIPAA, or
+  SOC2 BAA.

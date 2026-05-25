@@ -1,0 +1,60 @@
+# SEED ENTRY — canonical example for development and testing
+# Live registry lives in the database. See registry/README.md
+
+schema_version: "0.2"
+
+id: perplexity
+label: Perplexity
+node_id: ideation-chat
+website: https://www.perplexity.ai
+
+# Lifecycle
+# $ref: model/types/lifecycle-statuses.md
+status: active
+# $ref: model/types/data-sources.md
+data_source: manual
+contributed_by: maintainer
+last_verified: 2026-05-25
+
+# Identity
+# $ref: model/types/hosting-types.md
+hosting: cloud
+open_source: false
+license: proprietary
+
+# Access
+api_access: true
+api_docs: https://docs.perplexity.ai
+model_agnostic: false
+
+# Pricing
+pricing_model: freemium
+free_tier: true
+free_tier_limits: "Limited daily queries on Pro search; standard search unlimited"
+paid_tiers: "Perplexity Pro (~$20/month) — unlimited Pro searches, API access, file uploads"
+# $ref: model/types/price-signals.md
+price_signal: low
+
+# Compliance & Geography
+data_residency: ["US"]
+compliance_certifications: []
+no_training_on_data: false
+
+# Integrations
+integrations:
+  - Perplexity API (REST)
+  - MCP (Model Context Protocol)
+
+# Criteria scores
+# $ref: model/types/score-values.md
+criteria_scores:
+  security-compliance: low
+  integration-depth: medium
+  observability: low
+  cost-tco: high
+  speed-delivery: high
+
+notes: >
+  Strong choice for solo/small team ideation and research. Not suitable for
+  enterprise use cases with GDPR/EU data residency requirements or SOC2 mandates.
+  MCP integration makes it useful as an agentic tool in orchestrated workflows.
