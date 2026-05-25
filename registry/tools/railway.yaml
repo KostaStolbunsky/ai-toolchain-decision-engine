@@ -1,10 +1,15 @@
-schema_version: "0.1"
+schema_version: "0.2"
 
 id: railway
 label: Railway
 node_id: hosting
 website: https://railway.app
-last_reviewed: 2026-05-25
+
+# Lifecycle
+status: active
+data_source: manual
+contributed_by: maintainer
+last_verified: 2026-05-25
 
 # Identity
 hosting: cloud

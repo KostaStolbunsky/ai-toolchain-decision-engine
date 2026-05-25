@@ -1,52 +1,60 @@
-# AI Toolchain Decision Engine
+# AI Toolchain Decision Engine (ATDE)
 
-> An abstract, domain-agnostic decision engine for selecting AI toolchains, workflows, and supporting systems — across any type of application, product, or organization.
+> An abstract, domain-agnostic decision engine for selecting AI toolchains, workflows, and supporting systems — for any type of application, product, or organisation.
 
 ---
 
 ## Vision
 
-The AI Toolchain Decision Engine guides users through an interactive decision process to compose the optimal combination of AI tools for every stage of a development lifecycle: from initial idea and specification, through orchestration and multi-agent execution, to deployment, observability, and governance.
+ATDE guides users through an interactive assessment to compose the optimal combination of AI tools for every stage of a development lifecycle: from initial idea and specification, through orchestration and multi-agent execution, to deployment, observability, and governance.
+
+The engine is abstract by design — it works with roles and criteria, not product names. Concrete tools are registered separately and scored against the model. The registry is a living system: continuously updated by an autonomous agent and open to community contributions.
 
 ---
 
 ## Core Principles
 
-- **Abstract & agnostic** — all nodes, datasets, taxonomies, and rules are domain-agnostic and technology-agnostic
-- **Controllably extensible** — the model can grow in all directions without breaking existing logic
+- **Abstract & agnostic** — all nodes, datasets, taxonomies, and rules are domain- and technology-agnostic
+- **Living registry** — tools are discovered, verified, and updated autonomously; humans retain override rights
+- **Controllably extensible** — the model grows in all directions without breaking existing logic
 - **Two-mode UX** — simplified wizard for general users, advanced interface for professionals
 - **Enterprise-grade by default** — security/compliance, integration depth, observability, cost, and speed of delivery are first-class criteria
+- **Security by design** — threat model covers every layer: registry integrity, scoring pipeline, contribution abuse, API and audit trail
 
 ---
 
 ## Target Audience
 
-| Mode | Entry point |
+| Profile | Entry point |
 |---|---|
-| Solo builder / solopreneur | Starts with use case |
-| Organization / enterprise | Starts with organizational context and constraints |
+| Solo builder / solopreneur | Use case first |
+| Department / team | Organisational context first |
+| Enterprise | Governance and compliance context first |
 
 ---
 
-## MVP Scope
+## How It Works
 
-Interactive quiz-style decision flow that:
+1. **Assessment** — user answers a short context-aware questionnaire (wizard or advanced mode)
+2. **EvaluationFrame** — weights and hard rules are derived from the context profile
+3. **Scoring** — each candidate tool is scored via a weighted sum across applicable criteria; overrides filter or adjust scores
+4. **Recommendation** — ranked list of tools per node with rationale, alternatives, caveats, and confidence level
 
-1. Collects context: user type, use case, constraints, priorities
-2. Traverses the abstract decision model
-3. Outputs a recommended AI toolchain configuration with alternatives and trade-offs per node
-
-> No deep step-by-step plans in MVP — clean, actionable recommendations only.
+> Scoring is fully deterministic and rule-based. No AI inference in the scoring pipeline.
 
 ---
 
-## Key Enterprise Criteria
+## Key Evaluation Criteria
 
-- Security / Compliance
-- Integration Depth
-- Observability (audit, logging, access control)
-- Cost
-- Speed of Delivery
+| Criterion | Default weight |
+|---|---|
+| Security / Compliance | 0.25 |
+| Integration Depth | 0.20 |
+| Observability & Auditability | 0.20 |
+| Cost (TCO) | 0.20 |
+| Speed of Delivery | 0.15 |
+
+Weights are adjustable per context profile via the EvaluationFrame.
 
 ---
 
@@ -54,20 +62,71 @@ Interactive quiz-style decision flow that:
 
 ```
 /
-├── README.md          # This file
-├── adr/               # Architecture Decision Records
-├── docs/              # Project documentation
-└── model/             # Abstract decision model: nodes, taxonomies, rules
+├── README.md                   # This file
+├── adr/                        # Architecture Decision Records
+├── assessment/                 # Assessment flows (solo and org entry points)
+│   ├── ASSESSMENT_SOLO.md
+│   └── ASSESSMENT_ORG.md
+├── docs/                       # Project documentation
+│   ├── open-questions.md       # Open decisions and topics for discussion
+│   └── session-notes/          # Session notes for continuity
+├── model/                      # Abstract decision model
+│   ├── METAMODEL.md            # Core entity schema (ContextProfile, Node, Implementation, EvaluationFrame, DecisionPath, Recommendation)
+│   ├── DECISION_TREE.md        # Layer 0 and Layer 1 decision routing
+│   ├── nodes.md                # 14 abstract node types across 9 lifecycle stages
+│   ├── use-cases.md            # Use case taxonomy (10 top-level categories)
+│   ├── criteria.md             # Evaluation criteria schema and default weights
+│   ├── scoring.md              # Scoring and ranking algorithm (4 phases, worked example)
+│   └── tool-registry.md        # Tool registry schema and contribution guide
+└── registry/                   # Concrete tool implementations
+    └── tools/                  # One YAML file per registered tool
+        ├── perplexity.yaml
+        ├── claude-code.yaml
+        └── railway.yaml
 ```
+
+---
+
+## Model Status
+
+| Component | Status |
+|---|---|
+| Metamodel (core entities) | ✅ Done — v0.1 |
+| Decision tree (Layer 0 + 1) | ✅ Done |
+| Assessment flows (solo + org) | ✅ Done |
+| Node types (14 nodes, 9 stages) | ✅ Done |
+| Use case taxonomy (top level) | ✅ Done |
+| Criteria schema | ✅ Done (primary criteria) |
+| Tool registry schema | ✅ Done — v0.1 |
+| Scoring & ranking logic | ✅ Done — v0.1 |
+| Registry lifecycle / contribution pipeline | 🟡 In progress |
+| Security / threat model | 🔴 Planned — STO-37 |
+| UX design | 🔴 Not started |
+
+---
+
+## Registry
+
+The tool registry lives in `registry/tools/`. Each file is a YAML entry describing a concrete tool: its node role, pricing, compliance, integrations, and criteria scores.
+
+Registry entries have a lifecycle: `draft → active → deprecated`. They are created and updated by an autonomous agent and open to community contribution via pull request. All entries carry `data_source`, `contributed_by`, and `last_verified` fields for traceability.
+
+See [`model/tool-registry.md`](model/tool-registry.md) for the full schema and contribution guide.
+
+---
+
+## Security
+
+Security is a cross-cutting concern in ATDE. Key threat vectors include registry poisoning via agent manipulation, user submission abuse, scoring pipeline tampering, and audit trail integrity. A formal threat model is tracked in [STO-37](https://linear.app/stolbunsky/issue/STO-37).
+
+---
+
+## Project Tracking
+
+[AI Toolchain Decision Engine on Linear](https://linear.app/stolbunsky/project/ai-toolchain-decision-engine-c8bec269c408)
 
 ---
 
 ## Status
 
-🟡 In active design — discovery and knowledge model phase
-
----
-
-## Linear Project
-
-[AI Toolchain Decision Engine on Linear](https://linear.app/stolbunsky/project/ai-toolchain-decision-engine-c8bec269c408)
+🟡 Active design — model layer near complete, UX and implementation not started

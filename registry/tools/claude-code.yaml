@@ -1,10 +1,15 @@
-schema_version: "0.1"
+schema_version: "0.2"
 
 id: claude-code
 label: Claude Code
 node_id: coding-agent
 website: https://claude.ai/code
-last_reviewed: 2026-05-25
+
+# Lifecycle
+status: active
+data_source: manual
+contributed_by: maintainer
+last_verified: 2026-05-25
 
 # Identity
 hosting: cloud
