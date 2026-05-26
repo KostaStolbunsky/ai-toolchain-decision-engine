@@ -53,7 +53,7 @@ Maximum 7 steps before recommendation. Additional clarifying questions are inlin
 | E | A data or analytics product | `uc-data-product` |
 | F | An AI feature inside an existing product | `uc-embedded-ai` |
 | G | A knowledge base or documentation system | `uc-knowledge-system` |
-| H | Something else / I’m not sure | → clarification |
+| H | Something else / I'm not sure | → clarification |
 
 **Output:** `ContextProfile.dimensions.use_case`
 
@@ -61,13 +61,13 @@ Maximum 7 steps before recommendation. Additional clarifying questions are inlin
 1. Show one-line description of each use case A–G.
 2. Ask again.
 3. If still unclear → set `use_case = uc-prototype`, add flag `use_case_uncertain: true`.
-4. Flag surfaces in Recommendation as: *“Based on limited information, we defaulted to prototype scope. Review if your needs differ.”*
+4. Flag surfaces in Recommendation as: *"Based on limited information, we defaulted to prototype scope. Review if your needs differ."*
 
 **Multi-use-case edge case:**
-If user explicitly states two use cases (e.g. “prototype that becomes a SaaS”):
+If user explicitly states two use cases (e.g. "prototype that becomes a SaaS"):
 - Set primary `use_case` to the first stated.
 - Set `use_case_secondary` to the second.
-- Weight node traversal toward primary, surface secondary as “Future consideration” in Recommendation.
+- Weight node traversal toward primary, surface secondary as "Future consideration" in Recommendation.
 
 ---
 
@@ -145,7 +145,7 @@ If user explicitly states two use cases (e.g. “prototype that becomes a SaaS�
 
 | Option | Label | Hosting |
 |---|---|---|
-| A | Fully cloud-hosted, I don’t want to manage infra | `cloud` |
+| A | Fully cloud-hosted, I don't want to manage infra | `cloud` |
 | B | I want control but cloud is fine | `cloud` with observability required |
 | C | I prefer to self-host or run locally | `self_hosted` |
 
@@ -226,9 +226,4 @@ Recommendation:
 
 ---
 
-## Open questions (to resolve before implementation)
-
-- [ ] Should Q3S (collaboration) affect which nodes are shown, or only their weight?
-- [ ] At what score threshold does `confidence` drop from `high` to `medium`? Hypothesis: below 0.70.
-- [ ] Should the solo assessment ever ask about compliance? Hypothesis: only if `uc-public-saas` or `uc-compliance-workflow` is selected.
-- [ ] Max abandoned sessions before flow is flagged for UX review?
+> Open questions have been moved to Linear. See issues tagged `open-question` in the Stolbunsky team.
