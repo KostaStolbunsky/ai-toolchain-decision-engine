@@ -254,7 +254,4 @@ Recommendation:
 
 ## Open questions
 
-- [ ] Should `DecisionPath` steps map 1:1 to assessment questions, or can one step span multiple questions?
-- [ ] Should `Recommendation.output_type` be set by the engine or by the user's preference?
-- [ ] How are conflicting `overrides` in EvaluationFrame resolved — first match, priority order, or union?
-- [ ] Should a ContextProfile be mutable during the assessment flow, or locked after the first step?
+> Open questions from this document are tracked in Linear with label [`open-question`](https://linear.app/stolbunsky/issues?label=open-question).
