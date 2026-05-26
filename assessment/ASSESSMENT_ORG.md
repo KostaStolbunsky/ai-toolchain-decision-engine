@@ -121,7 +121,7 @@ Same as Q1B. No difference in options.
 **EvaluationFrame impact:**
 - `centralized` → boost `integration-depth` to 0.30 and `observability` to 0.25; filter to implementations with enterprise SLA available.
 - `federated` → balanced weights, no hard filters.
-- `informal` → surface governance risk note in Recommendation: *“No formal AI governance process detected. Consider establishing one before rolling out tooling at scale.”*
+- `informal` → surface governance risk note in Recommendation: *"No formal AI governance process detected. Consider establishing one before rolling out tooling at scale."*
 
 ---
 
@@ -165,7 +165,7 @@ If `gdpr` or `industry` selected: *Is your data processed in a specific geograph
 | G | A knowledge base or documentation system | `uc-knowledge-system` |
 | H | Modernizing or migrating a legacy system | `uc-app-modernization` |
 | I | Support or service desk automation | `uc-support-automation` |
-| J | Something else / I’m not sure | → clarification |
+| J | Something else / I'm not sure | → clarification |
 
 **Difference from solo flow:** Options H and I are added — more common in org context.
 
@@ -175,7 +175,7 @@ If `gdpr` or `industry` selected: *Is your data processed in a specific geograph
 
 ### Q3O — Maturity confirmation
 
-**Question:** How would you describe your team’s current AI toolchain maturity?
+**Question:** How would you describe your team's current AI toolchain maturity?
 
 | Option | Label | Maturity |
 |---|---|---|
@@ -273,10 +273,10 @@ Recommendation:
 |---|---|
 | Multiple compliance requirements | All applied; most restrictive filter wins |
 | Governance = informal + team 100+ | Surface governance risk alert in Recommendation |
-| Stack = on_premise + no self-hosted implementations at a node | Surface gap: *“No self-hosted option available for [node]. Closest alternative: [impl] with data residency option.”* |
+| Stack = on_premise + no self-hosted implementations at a node | Surface gap: *"No self-hosted option available for [node]. Closest alternative: [impl] with data residency option."* |
 | Use case unclear in org context | Default to `uc-internal-app` (most common org use case) with flag |
 | Maturity conflict (Q1C-4 vs Q3O) | Q3O answer wins; Q1C-4 pre-set shown as suggestion only |
-| Budget = high sensitivity + enterprise stack required | Surface trade-off: *“Your compliance and team size requirements limit free/open-source options.”* |
+| Budget = high sensitivity + enterprise stack required | Surface trade-off: *"Your compliance and team size requirements limit free/open-source options."* |
 
 ---
 
@@ -295,10 +295,6 @@ Recommendation:
 
 ---
 
-## Open questions (to resolve before implementation)
+## Open questions
 
-- [ ] Should Q5O (team size) affect which nodes are shown, or only their required/optional status?
-- [ ] For centralized governance: should the engine ask for the approved vendor list explicitly, or assume it will be applied post-recommendation?
-- [ ] Should department and enterprise routes eventually split into two separate assessment files, or stay unified here?
-- [ ] At what team size threshold does `governance` node become mandatory? Hypothesis: 21+, confirmed above — needs stakeholder validation.
-- [ ] Should org recommendations include a *“not recommended”* section for implementations that were considered and excluded?
+> Open questions from this document are tracked in Linear with label [`open-question`](https://linear.app/stolbunsky/issues?label=open-question).
