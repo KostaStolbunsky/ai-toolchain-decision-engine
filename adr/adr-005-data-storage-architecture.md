@@ -118,7 +118,7 @@ Target pattern: **Active-Passive with automatic failover**
 
 - Primary: Turso
 - Replica: Cloudflare D1 (also SQLite-compatible, free tier: 5GB, 25M reads/day)
-- Continuous replication via Turso’s embedded replica feature
+- Continuous replication via Turso's embedded replica feature
 - Healthcheck at edge (Cloudflare Workers, free)
 - On primary failure: DNS/routing switches to D1 replica automatically
 - RTO target: <30 seconds
@@ -178,8 +178,4 @@ Sharding is natural: data is already logically partitioned by `node_id`. No sche
 
 ---
 
-## Open questions
-
-- [ ] Should `tool_scores` be recomputed on every scoring request, or only on registry/EvaluationFrame mutation? (precompute vs lazy)
-- [ ] What is the public API surface for registry reads? REST? GraphQL? Read-only SDK?
-- [ ] Should the seed set be auto-synced to DB on deploy, or managed separately?
+> Open questions have been moved to Linear. See issues tagged `open-question` in the Stolbunsky team.
